@@ -14,10 +14,10 @@ add_executable(${PROJECT_NAME}
 find_package(SDL2 REQUIRED)
 target_link_libraries(${PROJECT_NAME} SDL2::Main)
 
+# Add and link SDL2_ttf library
+find_package(SDL2_ttf REQUIRED)
+target_link_libraries(${PROJECT_NAME} SDL2::TTF)
+
 # Add SDL2_image library
 # find_package(SDL2_image REQUIRED)
 # target_link_libraries(${PROJECT_NAME} SDL2::Image)
-
-# Add SDL2_ttf library
-# find_package(SDL2_ttf REQUIRED)
-# target_link_libraries(${PROJECT_NAME} SDL2::TTF)
