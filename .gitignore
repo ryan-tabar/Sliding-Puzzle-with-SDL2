@@ -1,0 +1,8 @@
+### Output FIle ###
+Sliding-Puzzle
+
+### CMake ###
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
