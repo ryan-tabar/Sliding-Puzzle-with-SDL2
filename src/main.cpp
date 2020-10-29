@@ -5,26 +5,24 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include <time.h>
 #include "tile.h"
 
+inline bool inBounds(const int row, const int col, const int maxRow, const int maxCol) {
+    return !(row < 0 || row > maxRow || col < 0 || col > maxCol);
+}
+
 bool isEmptyTileInNeighbours(std::vector<std::vector<Tile>>& tiles, const int row, const int col, Tile* emptyTile) {
-    // Check for empty tile of neighbours (only in vertical and horizontal direction)
-    for (int delta = -1; delta < 2; delta += 2) {
-        // If tile is not valid
-        if (row + delta < 0 || row + delta > tiles.size()) {
-            continue;
-        }
-        if (emptyTile == &tiles[row + delta][col]) {
-            return true;
-        }
-    }
-    for (int delta = -1; delta < 2; delta += 2) {
-        // If tile is not valid
-        if (col + delta < 0 || col + delta > tiles.size()) {
-            continue;
-        }
-        if (emptyTile == &tiles[row][col + delta]) {
-            return true;
+    // Check north, east, south and west tile
+    const int deltas[4][2] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+
+    // For each neighbour
+    for (int i = 0; i < 4; ++i) {
+        // If tile is valid
+        if (inBounds(row + deltas[i][0], col + deltas[i][1], tiles.size() - 1, tiles[0].size() - 1)) {
+            if (emptyTile == &tiles[row + deltas[i][0]][col + deltas[i][1]]) {
+                return true;
+            }
         }
     }
 
@@ -34,8 +32,8 @@ bool isEmptyTileInNeighbours(std::vector<std::vector<Tile>>& tiles, const int ro
 
 int main( int argc, char* args[] ) {
     // Screen dimensions
-    const unsigned int SCREEN_WIDTH = 600;
-    const unsigned int SCREEN_HEIGHT = 600;
+    const unsigned int SCREEN_WIDTH = 550;
+    const unsigned int SCREEN_HEIGHT = 550;
 
     // Tile dimensions based on difficulty
     // Puzzle difficulty proportional to number of tiles e.g. 4 -> 4 x 4 tiles
@@ -132,8 +130,44 @@ int main( int argc, char* args[] ) {
     int oldYPosition;
 
     // Shuffle tiles
-    
+    const unsigned int TOTAL_SWAPS = 200;
+    // Set empty tile to last tile
+    int emptyTileRow = DIFFICULTY - 1;
+    int emptyTileCol = DIFFICULTY - 1;
+    std::vector<std::vector<int>> neighbours;
+    srand(time(NULL));
+    // Check north, east, south and west tile
+    const int deltas[4][2] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+    // Shuffle with random swaps
+    for (int swap = 0; swap < TOTAL_SWAPS; ++swap) {
+        for (int i = 0; i < 4; ++i) {
+            const int deltaRow = deltas[i][0];
+            const int deltaCol = deltas[i][1];
+            if (inBounds(emptyTileRow + deltaRow, emptyTileCol + deltaCol, tiles.size() - 1, tiles[0].size() - 1)) {
+                std::vector<int> neighbour = {emptyTileRow + deltaRow, emptyTileCol + deltaCol};
+                neighbours.push_back(neighbour);
+            }
+        }
 
+        // Choose random tile from neighbours
+        const int randomIndex = rand() % neighbours.size();
+        const int row = neighbours[randomIndex][0];
+        const int col = neighbours[randomIndex][1];
+
+        // Keep track of unsolved state
+        
+
+        // Perform swap
+        const int tempPositionX = emptyTile->getXPosition();
+        const int tempPositionY = emptyTile->getYPosition();
+        emptyTile->setPositionTo(tiles[row][col].getXPosition(), tiles[row][col].getYPosition());
+        tiles[row][col].setPositionTo(tempPositionX, tempPositionY);
+        std::iter_swap(&tiles[row][col], emptyTile);
+        emptyTile = &tiles[row][col];
+        emptyTileRow = row;
+        emptyTileCol = col;
+        neighbours.clear();
+    }
 
     // Game loop variables
     bool stop = false;
@@ -213,7 +247,7 @@ int main( int argc, char* args[] ) {
         }
 
         // Add overall delay to slow program down
-        // SDL_Delay(5);
+        // SDL_Delay(1);
     }
 
     // Free textures

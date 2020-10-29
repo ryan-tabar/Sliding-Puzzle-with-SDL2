@@ -59,6 +59,8 @@ bool Tile::moveTo(const int x, const int y) {
 void Tile::setPositionTo(const int x, const int y) {
     mRect.x = x;
     mRect.y = y;
+
+    centerText();
 }
 
 bool Tile::isMouseInside(const int x, const int y) {
