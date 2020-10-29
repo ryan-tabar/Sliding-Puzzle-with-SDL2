@@ -8,16 +8,18 @@ class Tile {
         SDL_Rect mRect;
         SDL_Color mColour;
 
-        const char* mNumber;
         SDL_Rect mFontRect;
-        TTF_Font* mFont;
         SDL_Texture* mTexture;
 
-    public:
-        Tile(SDL_Rect* rect, SDL_Color* colour, const char* number, TTF_Font* font, SDL_Renderer* renderer);
-
         void centerText();
-        void move(int dx, int dy);
-        void render(SDL_Renderer* renderer);
+    public:
+        Tile(const SDL_Rect& rect, const SDL_Color& colour, const char* number, TTF_Font* const font, SDL_Renderer* const renderer);
+
+        int getXPosition();
+        int getYPosition();
+        void setPositionTo(const int x, const int y);
+        bool moveTo(const int x, const int y);
+        bool isMouseInside(const int x, const int y);
+        void render(SDL_Renderer* const renderer) const;
         void free();
 };
