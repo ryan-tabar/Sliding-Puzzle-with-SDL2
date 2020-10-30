@@ -4,16 +4,29 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <functional>
 #include <time.h>
 #include "tile.h"
 
-inline bool inBounds(const int row, const int col, const int maxRow, const int maxCol) {
+typedef std::vector<std::vector<Tile>> tileArray;
+
+static void forEachTile(tileArray& tiles, std::function<void(tileArray&, const int, const int)>&& func) {
+    // Perform a function on each tile
+    for (int row = 0; row < tiles.size(); ++row) {
+        for (int col = 0; col < tiles[row].size(); ++col) {
+            func(tiles, row, col);
+        }
+    }
+}
+
+static inline bool inBounds(const int row, const int col, const int maxRow, const int maxCol) {
+    // Return true if valid index
     return !(row < 0 || row > maxRow || col < 0 || col > maxCol);
 }
 
-bool isEmptyTileInNeighbours(std::vector<std::vector<Tile>>& tiles, const int row, const int col, Tile* emptyTile) {
+static bool isEmptyTileInNeighbours(tileArray& tiles, const int row, const int col, Tile* emptyTile) {
     // Check north, east, south and west tile
-    const int deltas[4][2] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+    static const int deltas[4][2] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
 
     // For each neighbour
     for (int i = 0; i < 4; ++i) {
@@ -79,7 +92,7 @@ int main( int argc, char* args[] ) {
     }
 
     // Create vector of tiles
-    std::vector<std::vector<Tile>> tiles;
+    tileArray tiles;
     int startY = 0;
     for (int row = 0; row < DIFFICULTY; ++row) {
         std::vector<Tile> tileRow;
@@ -115,9 +128,9 @@ int main( int argc, char* args[] ) {
     float deltaTimeRendered;
 
     // Animation speed parameters
-    const unsigned int pixelsPerSecond = 1000;
+    const unsigned int pixelsPerSecond = 300;
     const float milliSecondsPerPixel = 1000 / pixelsPerSecond;
-    float lastTimeMoved = SDL_GetTicks();
+    float lastTimeMoved;
     float deltaTimeMoved;
     
     // Track the "moving" and "empty" tile
@@ -171,6 +184,7 @@ int main( int argc, char* args[] ) {
     SDL_Event event;
     bool checkSolved = false;
     bool solved = false;
+    bool render = true;
 
     // Game loop
     while (!stop) {
@@ -180,22 +194,21 @@ int main( int argc, char* args[] ) {
             if (event.type == SDL_QUIT || solved) {
                 stop = true;
             }
-            // Handle mouse down
+            // Handle mouse down (only when no tiles are moving)
             if (doneMoving) {
                 if (event.type == SDL_MOUSEBUTTONDOWN) {
-                    int x, y;
-                    SDL_GetMouseState(&x, &y);
-                    for (int row = 0; row < tiles.size(); ++row) {
-                        for (int col = 0; col < tiles[row].size(); ++col) {
-                            if (tiles[row][col].isMouseInside(x, y)) {
-                                if (isEmptyTileInNeighbours(tiles, row, col, emptyTile)) {
-                                    movingTile = &tiles[row][col];
-                                    selected = true;
-                                    doneMoving = false;
-                                }
+                    forEachTile(tiles, [&movingTile, emptyTile, &selected, &doneMoving, &lastTimeMoved](tileArray& tiles, const int row, const int col) {
+                        int x, y;
+                        SDL_GetMouseState(&x, &y);
+                        if (tiles[row][col].isMouseInside(x, y)) {
+                            if (isEmptyTileInNeighbours(tiles, row, col, emptyTile)) {
+                                movingTile = &tiles[row][col];
+                                selected = true;
+                                doneMoving = false;
+                                lastTimeMoved = SDL_GetTicks();
                             }
                         }
-                    }
+                    });
                 }
             }
         }
@@ -207,11 +220,15 @@ int main( int argc, char* args[] ) {
             selected = false;
         }
 
-        // Move tile into empty tile and control animation speed (indepedant of frame rate)
+        // Move tile into empty tile and control animation speed (independant of frame rate)
         if (movingTile != nullptr) {
             deltaTimeMoved = SDL_GetTicks() - lastTimeMoved;
             if (deltaTimeMoved > milliSecondsPerPixel) {
-                doneMoving = movingTile->moveTo(emptyTile->getXPosition(), emptyTile->getYPosition());
+                // Move n number of pixels based on delta time;
+                int pixelsToMove = deltaTimeMoved / milliSecondsPerPixel;
+                for (int i = 0; i < pixelsToMove; ++i) {
+                    doneMoving = movingTile->moveTo(emptyTile->getXPosition(), emptyTile->getYPosition());
+                }
                 if (doneMoving) {
                     emptyTile->setPositionTo(tempXPosition, tempYPosition);
                     std::iter_swap(movingTile, emptyTile);
@@ -221,48 +238,46 @@ int main( int argc, char* args[] ) {
                 }
                 lastTimeMoved = SDL_GetTicks();
             }
+            render = true;
         }
 
         // Check solved
         if (checkSolved) {
             solved = true;
-            for (int row = 0; row < tiles.size(); ++row) {
-                for (int col = 0; col < tiles[row].size(); ++col) {
-                    const int number = row * DIFFICULTY + col + 1;
-                    if (tiles[row][col].getNumber() != number) {
-                        solved = false;
-                    }
+            forEachTile(tiles, [&solved, DIFFICULTY](tileArray& tiles, const int row, const int col) {
+                const int number = row * DIFFICULTY + col + 1;
+                if (tiles[row][col].getNumber() != number) {
+                    solved = false;
                 }
-            }
+            });
             checkSolved = false;
         }
 
-        
-        // Control frame rate (rendering rate)
-        deltaTimeRendered = SDL_GetTicks() - lastTimeRendered;
-        if (deltaTimeRendered > milliSecondsPerFrame) {
-            // Clear screen and render tiles
-            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-            SDL_RenderClear(renderer);
-            
-            // Render all tiles
-            for (int row = 0; row < tiles.size(); ++row) {
-                for (int col = 0; col < tiles[row].size(); ++col) {
+        // Render and control frame rate (rendering rate)
+        if (render) {
+            deltaTimeRendered = SDL_GetTicks() - lastTimeRendered;
+            if (deltaTimeRendered > milliSecondsPerFrame) {
+                // Clear screen and render tiles
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+                SDL_RenderClear(renderer);
+                
+                // Render all tiles
+                forEachTile(tiles, [renderer, emptyTile](tileArray& tiles, const int row, const int col) {
                     // Don't render empty tile
-                    if (emptyTile == &tiles[row][col]) {
-                        continue;
+                    if (emptyTile != &tiles[row][col]) {
+                        tiles[row][col].render(renderer);
                     }
-                    tiles[row][col].render(renderer);
-                }
-            }
+                });
 
-            // Update screen from backbuffer and clear backbuffer
-            SDL_RenderPresent(renderer);
-            lastTimeRendered = SDL_GetTicks();
+                // Update screen from backbuffer and clear backbuffer
+                SDL_RenderPresent(renderer);
+                lastTimeRendered = SDL_GetTicks();
+                render = false;
+            }
         }
 
         // Add overall delay to slow program down
-        // SDL_Delay(1);
+        SDL_Delay(5);
     }
 
     if (solved) {
@@ -270,11 +285,9 @@ int main( int argc, char* args[] ) {
     }
 
     // Free textures
-    for (int row = 0; row < tiles.size(); ++row) {
-        for (int col = 0; col < tiles[row].size(); ++col) {
-            tiles[row][col].free();
-        }
-    }
+    forEachTile(tiles, [](tileArray& tiles, const int row, const int col) {
+        tiles[row][col].free();
+    });
 
     // Destroy renderer and window
     SDL_DestroyRenderer(renderer);
