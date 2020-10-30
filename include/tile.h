@@ -1,10 +1,13 @@
 #pragma once
-#include<SDL.h>
-#include<SDL_ttf.h>
-#include<iostream>
+#include <SDL.h>
+#include <SDL_ttf.h>
+#include <iostream>
+#include <string>
 
 class Tile {
     private:
+        int mNumber;
+
         SDL_Rect mRect;
         SDL_Color mColour;
 
@@ -13,13 +16,14 @@ class Tile {
 
         void centerText();
     public:
-        Tile(const SDL_Rect& rect, const SDL_Color& colour, const char* number, TTF_Font* const font, SDL_Renderer* const renderer);
+        Tile(const SDL_Rect& rect, const SDL_Color& colour, const int number, TTF_Font* const font, SDL_Renderer* const renderer);
 
         int getXPosition();
         int getYPosition();
         void setPositionTo(const int x, const int y);
         bool moveTo(const int x, const int y);
-        bool isMouseInside(const int x, const int y);
+        bool isMouseInside(const int x, const int y) const;
+        int getNumber();
         void render(SDL_Renderer* const renderer) const;
         void free();
 };

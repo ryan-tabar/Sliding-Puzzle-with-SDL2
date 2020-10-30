@@ -1,11 +1,14 @@
 #include "tile.h"
 
-Tile::Tile(const SDL_Rect& rect, const SDL_Color& colour, const char* number, TTF_Font* const font, SDL_Renderer* const renderer) 
-    : mRect(rect), mColour(colour), mFontRect({0, 0, 0, 0}), mTexture(nullptr) {
+Tile::Tile(const SDL_Rect& rect, const SDL_Color& colour, const int number, TTF_Font* const font, SDL_Renderer* const renderer) 
+    : mRect(rect), mColour(colour), mNumber(number), mFontRect({0, 0, 0, 0}), mTexture(nullptr) {
+    
+    // Convert number to c style string
+    const char* numberStr = std::to_string(number).c_str();
 
     // Create text texture from c string to display number
     SDL_Color fontColour = {0, 0, 0, 255};
-    SDL_Surface* textSurface = TTF_RenderText_Solid(font, number, fontColour);
+    SDL_Surface* textSurface = TTF_RenderText_Solid(font, numberStr, fontColour);
     if (textSurface == nullptr) {
         std::cout << "Unable to render text surface! Error: " << TTF_GetError() << std::endl; 
     } else {
@@ -63,7 +66,7 @@ void Tile::setPositionTo(const int x, const int y) {
     centerText();
 }
 
-bool Tile::isMouseInside(const int x, const int y) {
+bool Tile::isMouseInside(const int x, const int y) const {
     // Assume mouse is inside tile
     bool inside = true;
 
@@ -89,6 +92,10 @@ bool Tile::isMouseInside(const int x, const int y) {
 	}
 
     return inside;
+}
+
+int Tile::getNumber() {
+    return mNumber;
 }
 
 void Tile::render(SDL_Renderer* const renderer) const {
