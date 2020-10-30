@@ -39,7 +39,7 @@ void Tile::centerText() {
 }                                                                                                                                                                                                                                                                            
 
 bool Tile::moveTo(const int x, const int y) {
-    // Move tile to target x and y position by delta amount
+    // Move tile to target x and y position by delta amount (+1 or -1)
     // Keep moving until tile is on target
     if (mRect.x != x) {
         const int delta = (x - mRect.x > 0) ? 1 : -1;
