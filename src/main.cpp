@@ -7,6 +7,7 @@
 #include <functional>
 #include <time.h>
 #include "tile.h"
+#include "stopwatch.h"
 
 typedef std::vector<std::vector<Tile>> tileArray;
 
@@ -49,7 +50,7 @@ int main( int argc, char* args[] ) {
 
     // Puzzle difficulty proportional to number of tiles e.g. 4 -> 4 x 4 tiles
     // number of tiles = difficulty * difficulty
-    const unsigned int DIFFICULTY = 5;
+    const unsigned int DIFFICULTY = 4;
     const unsigned int NUMBER_OF_BORDERS = DIFFICULTY + 1;
     const unsigned int BORDER_THICKNESS = 6;
     const unsigned int TILE_WIDTH = (SCREEN_WIDTH - NUMBER_OF_BORDERS * BORDER_THICKNESS) / DIFFICULTY; 
@@ -128,7 +129,7 @@ int main( int argc, char* args[] ) {
     float deltaTimeRendered;
 
     // Animation speed parameters
-    const unsigned int pixelsPerSecond = 300;
+    const unsigned int pixelsPerSecond = 500;
     const float milliSecondsPerPixel = 1000 / pixelsPerSecond;
     float lastTimeMoved;
     float deltaTimeMoved;
@@ -253,11 +254,13 @@ int main( int argc, char* args[] ) {
             checkSolved = false;
         }
 
-        // Render and control frame rate (rendering rate)
-        if (render) {
-            deltaTimeRendered = SDL_GetTicks() - lastTimeRendered;
-            if (deltaTimeRendered > milliSecondsPerFrame) {
-                // Clear screen and render tiles
+        // Couple and control frame rate with game loop (render loop)
+        deltaTimeRendered = SDL_GetTicks() - lastTimeRendered;
+        if (deltaTimeRendered < milliSecondsPerFrame) {
+            SDL_Delay(milliSecondsPerFrame - deltaTimeRendered);
+            // Render if something on display changes
+            if (render) {
+                // Clear screen
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
                 SDL_RenderClear(renderer);
                 
@@ -271,13 +274,10 @@ int main( int argc, char* args[] ) {
 
                 // Update screen from backbuffer and clear backbuffer
                 SDL_RenderPresent(renderer);
-                lastTimeRendered = SDL_GetTicks();
                 render = false;
             }
+            lastTimeRendered = SDL_GetTicks();
         }
-
-        // Add overall delay to slow program down
-        SDL_Delay(5);
     }
 
     if (solved) {
@@ -299,8 +299,9 @@ int main( int argc, char* args[] ) {
     TTF_CloseFont(font);
     font = nullptr;
 
-    // Quit SDL
+    // Quit SDL and TTF
     SDL_Quit();
+    TTF_Quit();
 
     // Exit program
     std::cout << "Exiting program..." << std::endl;
