@@ -33,13 +33,12 @@ void UserInterface::centerText() {
 	mFontRect.x = mRect.x + 0.5 * (mRect.w - mFontRect.w);
 }                                                                                                                                                                                                                                                                            
 
-
 void UserInterface::render(SDL_Renderer* const renderer) const {
     // Render UserInterface
     SDL_SetRenderDrawColor(renderer, mColour.r, mColour.g, mColour.b, mColour.a);
     SDL_RenderFillRect(renderer, &mRect);
 
-    // Render font
+    // Render texture if it exists
     if (mTexture != nullptr) {
         SDL_RenderCopy(renderer, mTexture, nullptr, &mFontRect);
     } else {
