@@ -2,21 +2,14 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <iostream>
-#include <string>
+#include "userInterface.h"
 
-class Tile {
+class Tile: public UserInterface {
     private:
         int mNumber;
-
-        SDL_Rect mRect;
-        SDL_Color mColour;
-
-        SDL_Rect mFontRect;
-        SDL_Texture* mTexture;
-
-        void centerText();
+        
     public:
-        Tile(const SDL_Rect& rect, const SDL_Color& colour, const int number, TTF_Font* const font, SDL_Renderer* const renderer);
+        Tile(const SDL_Rect& rect, const SDL_Color& colour, TTF_Font* const font, const SDL_Color& mFontColour, const int number);
 
         int getXPosition();
         int getYPosition();
@@ -24,6 +17,5 @@ class Tile {
         bool moveTo(const int x, const int y);
         bool isMouseInside(const int x, const int y) const;
         int getNumber();
-        void render(SDL_Renderer* const renderer) const;
-        void free();
+        
 };
