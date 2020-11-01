@@ -45,18 +45,28 @@ static bool isEmptyTileInNeighbours(tileArray& tiles, const int row, const int c
 
 int main( int argc, char* args[] ) {
     // Screen dimensions
-    const unsigned int SCREEN_WIDTH = 550;
-    const unsigned int SCREEN_HEIGHT = 550;
+    const unsigned int SCREEN_WIDTH = 500;
+    const unsigned int SCREEN_HEIGHT = 650;
 
     // Puzzle difficulty proportional to number of tiles e.g. 4 -> 4 x 4 tiles
     // number of tiles = difficulty * difficulty
     const unsigned int DIFFICULTY = 4;
     const unsigned int NUMBER_OF_BORDERS = DIFFICULTY + 1;
+    const unsigned int NUMBER_OF_COL_ELEMENTS = DIFFICULTY + 1; // including stopwatch
+    const unsigned int NUMBER_OF_ROW_ELEMENTS = DIFFICULTY;
     const unsigned int BORDER_THICKNESS = 6;
-    const unsigned int TILE_WIDTH = (SCREEN_WIDTH - NUMBER_OF_BORDERS * BORDER_THICKNESS) / DIFFICULTY; 
-    const unsigned int TILE_HEIGHT = TILE_WIDTH;
+    const unsigned int TILE_WIDTH = (SCREEN_WIDTH - NUMBER_OF_BORDERS * BORDER_THICKNESS) / NUMBER_OF_ROW_ELEMENTS; 
+    const unsigned int TILE_HEIGHT = (SCREEN_HEIGHT - NUMBER_OF_BORDERS * BORDER_THICKNESS) / NUMBER_OF_COL_ELEMENTS; 
+
+    // Stopwatch dimensions
+    const unsigned int STOPWATCH_WIDTH = SCREEN_WIDTH - 2 * BORDER_THICKNESS;
+    const unsigned int STOPWATCH_HEIGHT = TILE_HEIGHT;
+
+    // Define colours
     const SDL_Color TILE_COLOUR = {255, 123, 43, 255}; // Orange
     const SDL_Color EMPTY_TILE_COLOUR = {0, 0, 0, 255}; // Black
+    const SDL_Color FONT_COLOUR = {0, 0, 0, 255}; // Black
+    const SDL_Color STOPWATCH_COLOUR = {255, 123, 43, 255}; // Orange
 
     // Initialise SDL video subsystem
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -92,17 +102,23 @@ int main( int argc, char* args[] ) {
         return -1;
     }
 
+    // Place stopwatch at the top
+    int startX = BORDER_THICKNESS;
+    int startY = BORDER_THICKNESS;
+    SDL_Rect rect = {startX, startY, STOPWATCH_WIDTH, STOPWATCH_HEIGHT};
+    Stopwatch stopwatch(rect, STOPWATCH_COLOUR, font, FONT_COLOUR);
+
     // Create vector of tiles
     tileArray tiles;
-    int startY = 0;
+    startY += TILE_HEIGHT;
     for (int row = 0; row < DIFFICULTY; ++row) {
         std::vector<Tile> tileRow;
         startY += BORDER_THICKNESS;
-        int startX = 0;
+        startX = 0;
         for (int col = 0; col < DIFFICULTY; ++col) {
 
             startX += BORDER_THICKNESS;
-            SDL_Rect rect = {startX, startY, TILE_WIDTH, TILE_HEIGHT};
+            rect = {startX, startY, TILE_WIDTH, TILE_HEIGHT};
             // Make final tile "empty"
             SDL_Color colour;
             if (row == DIFFICULTY - 1 && col == DIFFICULTY - 1) {
@@ -113,7 +129,10 @@ int main( int argc, char* args[] ) {
             // Calculate number to be assigned to tile
             int number = row * DIFFICULTY + col + 1;
 
-            Tile tile(rect, colour, number, font, renderer);
+            Tile tile(rect, colour, font, FONT_COLOUR, number);
+            // Convert number to c style string
+            const char* numberStr = std::to_string(number).c_str();
+            tile.loadTexture(renderer, numberStr);
             tileRow.push_back(tile);
             
             startX += TILE_WIDTH;
@@ -185,7 +204,9 @@ int main( int argc, char* args[] ) {
     SDL_Event event;
     bool checkSolved = false;
     bool solved = false;
-    bool render = true;
+
+    // Begin stopwatch
+    stopwatch.start();
 
     // Game loop
     while (!stop) {
@@ -229,17 +250,17 @@ int main( int argc, char* args[] ) {
                 int pixelsToMove = deltaTimeMoved / milliSecondsPerPixel;
                 for (int i = 0; i < pixelsToMove; ++i) {
                     doneMoving = movingTile->moveTo(emptyTile->getXPosition(), emptyTile->getYPosition());
-                }
-                if (doneMoving) {
-                    emptyTile->setPositionTo(tempXPosition, tempYPosition);
-                    std::iter_swap(movingTile, emptyTile);
-                    emptyTile = movingTile;
-                    movingTile = nullptr;
-                    checkSolved = true;
+                    if (doneMoving) {
+                        emptyTile->setPositionTo(tempXPosition, tempYPosition);
+                        std::iter_swap(movingTile, emptyTile);
+                        emptyTile = movingTile;
+                        movingTile = nullptr;
+                        checkSolved = true;
+                        break;
+                    }
                 }
                 lastTimeMoved = SDL_GetTicks();
             }
-            render = true;
         }
 
         // Check solved
@@ -256,28 +277,32 @@ int main( int argc, char* args[] ) {
 
         // Couple and control frame rate with game loop (render loop)
         deltaTimeRendered = SDL_GetTicks() - lastTimeRendered;
-        if (deltaTimeRendered < milliSecondsPerFrame) {
-            SDL_Delay(milliSecondsPerFrame - deltaTimeRendered);
-            // Render if something on display changes
-            if (render) {
-                // Clear screen
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-                SDL_RenderClear(renderer);
-                
-                // Render all tiles
-                forEachTile(tiles, [renderer, emptyTile](tileArray& tiles, const int row, const int col) {
-                    // Don't render empty tile
-                    if (emptyTile != &tiles[row][col]) {
-                        tiles[row][col].render(renderer);
-                    }
-                });
-
-                // Update screen from backbuffer and clear backbuffer
-                SDL_RenderPresent(renderer);
-                render = false;
-            }
+        if (deltaTimeRendered > milliSecondsPerFrame) {
             lastTimeRendered = SDL_GetTicks();
+            // Clear screen
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderClear(renderer);
+            
+            // Render stopwatch
+            stopwatch.calculateTime(renderer);
+            stopwatch.render(renderer);
+
+            // Render all tiles
+            forEachTile(tiles, [renderer, emptyTile](tileArray& tiles, const int row, const int col) {
+                // Don't render empty tile
+                if (emptyTile != &tiles[row][col]) {
+                    tiles[row][col].render(renderer);
+                }
+            });
+
+            // Update screen from backbuffer and clear backbuffer
+            SDL_RenderPresent(renderer);
+            
+        } else {
+            // Else cause a delay for the remaining amount
+            SDL_Delay(milliSecondsPerFrame - deltaTimeRendered);
         }
+
     }
 
     if (solved) {
