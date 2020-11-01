@@ -5,6 +5,7 @@ include_directories(include)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/sdl2-cmake-modules)
 
 add_executable(${PROJECT_NAME}
+    src/userInterface.cpp
     src/tile.cpp
     src/main.cpp
 )
