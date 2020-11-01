@@ -1,18 +1,18 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <time.h>
+#include <iostream>
+#include "userInterface.h"
 
-class Stopwatch {
+class Stopwatch : public UserInterface {
     private:
-        SDL_Rect mRect;
-        SDL_Color mColour;
+        time_t mStartTime;
+        char mElapsedTime[80];
 
-        SDL_Rect mFontRect;
-        SDL_Texture* mTexture;
     public:
-        Stopwatch();
+        Stopwatch(const SDL_Rect& rect, const SDL_Color& colour, TTF_Font* const font, const SDL_Color& mFontColour);
 
-        void calculateTime();
-        void loadTexture();
+        void start();
+        void calculateTime(SDL_Renderer* const renderer);
         
-}
+};
