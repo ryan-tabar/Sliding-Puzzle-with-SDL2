@@ -1,7 +1,7 @@
 #include "stopwatch.h"
 
-Stopwatch::Stopwatch(const SDL_Rect& rect, const SDL_Color& colour, TTF_Font* const font, const SDL_Color& mFontColour) 
-    :  UserInterface(rect, colour, font, mFontColour),
+Stopwatch::Stopwatch(const SDL_Rect& rect, const SDL_Color& colour, TTF_Font* const font, const SDL_Color& fontColour) 
+    :  UserInterface(rect, colour, font, fontColour),
     mStartTime(0), mElapsedTime("") {
     
 }
