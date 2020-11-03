@@ -1,7 +1,32 @@
 # Sliding Puzzle with SDL2
-
 A simple sliding puzzle game made with SDL2. It features a menu to choose difficulty and a stopwatch to measure time elapsed.
+
 ![Sliding-Puzzle-gif-1](assets/Sliding-Puzzle-1.gif?raw=true)
-A simple sliding puzzle game made with SDL2. It features a menu to choose difficulty and a stopwatch to measure time elapsed.
-
 ![Sliding-Puzzle-gif-2](assets/Sliding-Puzzle-2.gif?raw=true)
+
+## Requirements for Linux
+This project was made on Linux using make and cmake build system.
+This requires the following to be installed:
+  - git
+  - g++
+  - make
+  - cmake
+  - SDL2
+  - SDL2_ttf
+ 
+On Debian-based systems (including Ubuntu) to install SDL2 and SDL2_ttf do:
+```
+sudo apt-get install libsdl2-dev
+sudo apt-get install libsdl2-ttf-dev
+```
+
+More info on SDL installations at https://wiki.libsdl.org/Installation
+
+## Run on Linux
+```
+git clone --recurse-submodules https://github.com/SirFourier/Sliding-Puzzle-with-SDL2.git
+cd Sliding-Puzzle-with-SDL2
+cmake .
+make
+./Sliding-Puzzle
+```
