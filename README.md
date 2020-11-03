@@ -1,1 +1,2 @@
-# Sliding-Puzzle-with-SDL2
+# Sliding Puzzle with SDL2
+
