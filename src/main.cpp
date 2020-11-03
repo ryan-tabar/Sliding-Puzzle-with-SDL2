@@ -327,16 +327,18 @@ void playPuzzle(SDL_Renderer* renderer, bool* exit, const unsigned int DIFFICULT
                 if (event.type == SDL_MOUSEBUTTONDOWN) {
                     int x, y;
                     SDL_GetMouseState(&x, &y);
-                    forEachTile(tiles, [x, y, &movingTile, emptyTile, &selected, &doneMoving, &lastTimeMoved](tileArray& tiles, const int row, const int col) {
-                        if (tiles[row][col].isMouseInside(x, y)) {
-                            if (isEmptyTileInNeighbours(tiles, row, col, emptyTile)) {
-                                movingTile = &tiles[row][col];
-                                selected = true;
-                                doneMoving = false;
-                                lastTimeMoved = SDL_GetTicks();
+                    if (!solved) {
+                        forEachTile(tiles, [x, y, &movingTile, emptyTile, &selected, &doneMoving, &lastTimeMoved](tileArray& tiles, const int row, const int col) {
+                            if (tiles[row][col].isMouseInside(x, y)) {
+                                if (isEmptyTileInNeighbours(tiles, row, col, emptyTile)) {
+                                    movingTile = &tiles[row][col];
+                                    selected = true;
+                                    doneMoving = false;
+                                    lastTimeMoved = SDL_GetTicks();
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                     if (menuButton.isMouseInside(x, y)) {
                         menuButton.changeColourTo(BUTTON_DOWN_COLOUR);
                         menuButtonPressed = true;
@@ -452,7 +454,7 @@ void playPuzzle(SDL_Renderer* renderer, bool* exit, const unsigned int DIFFICULT
 
 int main( int argc, char* args[] ) {
     // Screen dimensions
-    const unsigned int SCREEN_WIDTH = 450;
+    const unsigned int SCREEN_WIDTH = 410;
     const unsigned int SCREEN_HEIGHT = 600;
 
     // Initialise SDL video subsystem
