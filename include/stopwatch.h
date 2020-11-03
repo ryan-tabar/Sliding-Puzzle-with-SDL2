@@ -1,3 +1,4 @@
+#pragma once
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <time.h>
@@ -10,7 +11,7 @@ class Stopwatch : public UserInterface {
         char mElapsedTime[80];
 
     public:
-        Stopwatch(const SDL_Rect& rect, const SDL_Color& colour, TTF_Font* const font, const SDL_Color& mFontColour);
+        Stopwatch(const SDL_Rect& rect, const SDL_Color& colour, TTF_Font* const font, const SDL_Color& fontColour);
 
         void start();
         void calculateTime(SDL_Renderer* const renderer);
