@@ -14,7 +14,6 @@ class Tile: public UserInterface {
         int getYPosition();
         void setPositionTo(const int x, const int y);
         bool moveTo(const int x, const int y);
-        bool isMouseInside(const int x, const int y) const;
         int getNumber();
         
 };
