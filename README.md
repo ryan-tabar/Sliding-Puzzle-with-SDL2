@@ -1,5 +1,5 @@
 # Sliding Puzzle with SDL2
-A simple sliding puzzle game made with SDL2. It features a menu to choose difficulty and a stopwatch.
+A simple sliding puzzle game made with SDL2. It features a menu to choose difficulty and a stopwatch. It also includes animations for the sliding tiles.
 
 ![Sliding-Puzzle-gif-1](assets/Sliding-Puzzle-1.gif?raw=true)
 ![Sliding-Puzzle-gif-2](assets/Sliding-Puzzle-2.gif?raw=true)
