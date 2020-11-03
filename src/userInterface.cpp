@@ -27,11 +27,43 @@ void UserInterface::loadTexture(SDL_Renderer* const renderer, const char* text) 
     centerText();
 }
 
+bool UserInterface::isMouseInside(const int x, const int y) const {
+    // Assume mouse is inside tile
+    bool inside = true;
+
+   	// Mouse is left of the button
+	if (x < mRect.x)
+	{
+		inside = false;
+	}
+	// Mouse is right of the button
+	else if (x > mRect.x + mRect.w)
+	{
+		inside = false;
+	}
+	// Mouse above the button
+	else if (y < mRect.y)
+	{
+		inside = false;
+	}
+	// Mouse below the button
+	else if (y > mRect.y + mRect.h)
+	{
+		inside = false;
+	}
+
+    return inside;
+}
+
 void UserInterface::centerText() {
     // Center text on UserInterface
     mFontRect.y = mRect.y + 0.5 * (mRect.h - mFontRect.h);
 	mFontRect.x = mRect.x + 0.5 * (mRect.w - mFontRect.w);
 }                                                                                                                                                                                                                                                                            
+
+void UserInterface::changeColourTo(const SDL_Color& colour) {
+    mColour = colour;
+}
 
 void UserInterface::render(SDL_Renderer* const renderer) const {
     // Render UserInterface
