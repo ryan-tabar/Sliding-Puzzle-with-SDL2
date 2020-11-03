@@ -17,9 +17,11 @@ class UserInterface {
         void centerText();
 
     public:
-        UserInterface(const SDL_Rect& rect, const SDL_Color& colour, TTF_Font* const font, const SDL_Color& mFontColour);
+        UserInterface(const SDL_Rect& rect, const SDL_Color& colour, TTF_Font* const font, const SDL_Color& fontColour);
 
         void loadTexture(SDL_Renderer* const renderer, const char* text);
+        bool isMouseInside(const int x, const int y) const;
+        void changeColourTo(const SDL_Colour& colour);
         void render(SDL_Renderer* const renderer) const;
         void free();
 
