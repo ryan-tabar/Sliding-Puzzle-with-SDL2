@@ -1,9 +1,9 @@
 #pragma once
 #include <SDL.h>
 #include <SDL_ttf.h>
-#include "userInterface.h"
+#include "button.h"
 
-class Tile: public UserInterface {
+class Tile: public Button {
     private:
         int mNumber;
         

@@ -1,7 +1,7 @@
 #include "tile.h"
 
 Tile::Tile(const SDL_Rect& rect, const SDL_Color& colour, TTF_Font* const font, const SDL_Color& fontColour, const int number) 
-    : UserInterface(rect, colour, font, fontColour),
+    : Button(rect, colour, font, fontColour),
       mNumber(number) {
     
 }
