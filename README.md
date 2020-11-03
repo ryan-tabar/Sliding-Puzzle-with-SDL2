@@ -5,8 +5,7 @@ A simple sliding puzzle game made with SDL2. It features a menu to choose diffic
 ![Sliding-Puzzle-gif-2](assets/Sliding-Puzzle-2.gif?raw=true)
 
 ## Requirements for Linux
-This project was made on Linux using make and cmake build system.
-This requires the following to be installed:
+Requires the following to be installed:
   - git
   - g++
   - make
@@ -14,7 +13,7 @@ This requires the following to be installed:
   - SDL2
   - SDL2_ttf
  
-On Debian-based systems (including Ubuntu) to install SDL2 and SDL2_ttf do:
+On Debian-based systems (including Ubuntu), SDL2 and SDL2_ttf can be installed by doing:
 ```
 sudo apt-get install libsdl2-dev
 sudo apt-get install libsdl2-ttf-dev
@@ -30,3 +29,6 @@ cmake .
 make
 ./Sliding-Puzzle
 ```
+
+## Code structure
+![diagram-of-code-structure](assets/code-structure.png?raw=true)
