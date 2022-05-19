@@ -23,7 +23,7 @@ More info on SDL installations at https://wiki.libsdl.org/Installation
 
 ## Run on Linux
 ```
-git clone --recurse-submodules https://github.com/SirFourier/Sliding-Puzzle-with-SDL2.git
+git clone --recurse-submodules https://github.com/ryan-tabar/Sliding-Puzzle-with-SDL2.git
 cd Sliding-Puzzle-with-SDL2
 cmake .
 make
